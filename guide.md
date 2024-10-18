@@ -626,6 +626,19 @@ try await ViewHosting.host(sut) { sut in
 }
 ```
 
+If you're writing an `async` test for `NavigationDestination`, you might need to manually call `ViewHosting.expel()` to expel the current NavigationDestination view and let the implicit expel the NagivationStack base view for reducing memory consumption and memory leaks when the view holds a @ObservedObject.
+
+```swift
+let sut = TestDisplayByStateView(state: .error)
+try await ViewHosting.host(sut) { hostedView in
+    try await hostedView.inspection.inspect { view in
+        XCTAssertNoThrow(try view.actualView().inspect().find(viewWithAccessibilityIdentifier: "error_state_view"))
+        XCTAssertNoThrow(try view.actualView().inspect().find(text: "Uh-oh, Something wrong"))
+            
+        ViewHosting.expel()
+    }
+}
+```
 ## Advanced topics
 
 - [Styles](guide_styles.md)
